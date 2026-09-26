@@ -1,0 +1,14 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Secrets
+.env
+
+# Local database (contains real user data)
+office_board.db
+
+# User-uploaded attachments (keep the folder, ignore its contents)
+static/uploads/*
+!static/uploads/.gitkeep
