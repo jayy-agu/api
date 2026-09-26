@@ -45,6 +45,31 @@ class User(Base):
     mfa_enrolled_at = Column(DateTime, nullable=True)
 
 
+class AuthSession(Base):
+    """A live, server-side-revocable login session. One row is created per
+    issued access token (see routers/auth.py::_issue_access_token). Revoking
+    a row (or deleting it) invalidates that token immediately via
+    deps.get_current_user, instead of waiting for its JWT `exp` to pass --
+    this is what makes real server-side logout and 'sign out of all other
+    devices' possible."""
+    __tablename__ = "auth_sessions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    # The access token's JWT ID (jti claim). Looked up on every authenticated
+    # request (deps.get_current_user) to check this session hasn't been
+    # revoked, and used to find "the session behind this request" for
+    # logout / revoke-one / revoke-all-others.
+    token_jti = Column(String, nullable=False, unique=True, index=True)
+    ip_address = Column(String, nullable=True)
+    user_agent = Column(String, nullable=True)
+    revoked = Column(Boolean, nullable=False, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    last_seen_at = Column(DateTime, nullable=True)
+
+    user = relationship("User")
+
+
 class Post(Base):
     __tablename__ = "posts"
 
