@@ -775,8 +775,9 @@ function updateAttachmentPreview() {
   wrap.innerHTML = `
     <div class="ap-row">
       <span>${icon} ${escapeHtml(state.attachment.filename)}</span>
-      <button onclick="removeAttachment()">Remove</button>
+      <button id="remove-attachment-btn">Remove</button>
     </div>`;
+  document.getElementById("remove-attachment-btn").onclick = removeAttachment;
 }
 function removeAttachment() { state.attachment = null; updateAttachmentPreview(); }
 
@@ -966,13 +967,22 @@ async function loadManageMembers() {
           <div class="mhandle">@${escapeHtml(u.handle)} • ${u.department || "No dept"}</div>
         </div>
         <div class="manage-actions">
-          <select onchange="changeUserDept(${u.id}, this.value)">
+          <select data-dept-select data-user-id="${u.id}">
             ${depts.map((d) => `<option value="${d}" ${u.department === d ? "selected" : ""}>${d || "No Dept"}</option>`).join("")}
           </select>
-          <button class="btn-small" onclick="resetUserPassword(${u.id})">Reset PW</button>
-          ${u.id !== state.currentUser.id ? `<button class="btn-danger" onclick="removeUser(${u.id})">Remove</button>` : ""}
+          <button class="btn-small" data-reset-pw data-user-id="${u.id}">Reset PW</button>
+          ${u.id !== state.currentUser.id ? `<button class="btn-danger" data-remove-user data-user-id="${u.id}">Remove</button>` : ""}
         </div>
       </div>`).join("");
+    container.querySelectorAll("[data-dept-select]").forEach((el) => {
+      el.onchange = () => changeUserDept(Number(el.dataset.userId), el.value);
+    });
+    container.querySelectorAll("[data-reset-pw]").forEach((el) => {
+      el.onclick = () => resetUserPassword(Number(el.dataset.userId));
+    });
+    container.querySelectorAll("[data-remove-user]").forEach((el) => {
+      el.onclick = () => removeUser(Number(el.dataset.userId));
+    });
   } catch (e) {
     showErrorToast("Failed to load members");
   }
@@ -1277,15 +1287,15 @@ function renderBoard() {
         <div class="brand"><div class="brand-mark">JA</div> Jerry Agu's Dashboard</div>
         <div class="nav-actions">
           ${state.currentUser.isAdmin ? `<button class="nav-btn" id="add-teammate-header" title="Add teammate">${userPlusSvg()}</button>` : ""}
-          <button class="nav-btn" id="dm-btn" title="Messages" onclick="openDMs()">${messageSvg()}</button>
+          <button class="nav-btn" id="dm-btn" title="Messages">${messageSvg()}</button>
           <div class="notif-panel-wrap">
             <button class="nav-btn" id="notif-btn" title="Notifications">
               ${bellSvg()}<span id="notif-badge" class="badge ${unread > 0 ? "" : "hidden"}">${unread > 99 ? "99+" : unread}</span>
             </button>
             <div id="notif-panel" class="hidden"></div>
           </div>
-          <button class="nav-btn" id="profile-btn" title="Profile" onclick="showProfile()">${avatarHtml(state.currentUser.name, state.currentUser.profile_image, 30)}</button>
-          ${state.currentUser.isAdmin ? `<button class="nav-btn" id="admin-btn" title="Admin" onclick="showAdmin()">${shieldSvg()}</button>` : ""}
+          <button class="nav-btn" id="profile-btn" title="Profile">${avatarHtml(state.currentUser.name, state.currentUser.profile_image, 30)}</button>
+          ${state.currentUser.isAdmin ? `<button class="nav-btn" id="admin-btn" title="Admin">${shieldSvg()}</button>` : ""}
           <button class="nav-btn" id="logout-btn" title="Log out">${logoutSvg()}</button>
         </div>
       </div>
@@ -1306,7 +1316,7 @@ function renderBoard() {
         </div>
         <div class="composer-extras">
           <label class="attach-btn ${state.attachment ? "has-file" : ""}">
-            <input type="file" id="attach-input" style="display:none" accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip" onchange="handleAttachmentUpload(this)">
+            <input type="file" id="attach-input" style="display:none" accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip">
             ${paperclipSvg()} ${state.attachment ? "1 file" : "Attach"}
           </label>
         </div>
@@ -1348,9 +1358,14 @@ function renderBoard() {
   dom.msgInput.addEventListener("input", onComposerInput);
   dom.msgInput.addEventListener("keydown", onComposerKeydown);
   dom.postBtn.onclick = handlePost;
+  document.getElementById("attach-input").onchange = function () { handleAttachmentUpload(this); };
 
   document.getElementById("notif-btn").onclick = toggleNotifications;
   document.getElementById("logout-btn").onclick = logout;
+  document.getElementById("dm-btn").onclick = openDMs;
+  document.getElementById("profile-btn").onclick = showProfile;
+  const adminBtn = document.getElementById("admin-btn");
+  if (adminBtn) adminBtn.onclick = showAdmin;
   document.getElementById("archive-btn").onclick = () => {
     state.showArchive = !state.showArchive;
     updateFeed();
@@ -1660,14 +1675,19 @@ async function loadSessions() {
         <div class="mhandle">${escapeHtml(s.ip_address || "unknown IP")} · active ${timeAgo(s.last_seen_at || s.created_at)}</div>
       </div>
       <div class="manage-actions">
-        ${s.current ? "" : `<button class="btn-small" onclick="revokeSession(${s.id})">Sign out</button>`}
+        ${s.current ? "" : `<button class="btn-small" data-revoke-session data-session-id="${s.id}">Sign out</button>`}
       </div>
     </div>`).join("");
   const others = sessions.filter((s) => !s.current).length;
   box.innerHTML = `
     <div class="eyebrow" style="margin:16px 0 8px;">ACTIVE SESSIONS</div>
     ${rows || `<div style="color:var(--muted);font-size:.85rem;">No active sessions.</div>`}
-    ${others > 0 ? `<button class="btn-small" style="margin-top:10px;" onclick="revokeOtherSessions()">Sign out of all other devices</button>` : ""}`;
+    ${others > 0 ? `<button class="btn-small" style="margin-top:10px;" id="revoke-other-sessions-btn">Sign out of all other devices</button>` : ""}`;
+  box.querySelectorAll("[data-revoke-session]").forEach((el) => {
+    el.onclick = () => revokeSession(Number(el.dataset.sessionId));
+  });
+  const revokeOtherBtn = document.getElementById("revoke-other-sessions-btn");
+  if (revokeOtherBtn) revokeOtherBtn.onclick = revokeOtherSessions;
 }
 
 async function revokeSession(id) {
@@ -1701,4 +1721,24 @@ function userPlusSvg() { return `<svg width="18" height="18" viewBox="0 0 24 24"
 function shieldSvg() { return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`; }
 function paperclipSvg() { return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>`; }
 
+// ---------- Static UI wiring ----------
+// index.html's modal-close buttons, admin tabs, etc. used to rely on inline
+// onclick/onchange attributes. The app's own CSP (script-src 'self', no
+// 'unsafe-inline') silently blocks those -- the browser just refuses to run
+// them, with no visible error unless you check the console. So every one of
+// these is wired here instead, the same CSP-safe way the notif/logout
+// buttons already were.
+function wireStaticUI() {
+  document.getElementById("profile-modal-close").onclick = closeProfile;
+  document.getElementById("profile-upload").onchange = uploadProfileImage;
+  document.getElementById("admin-modal-close").onclick = closeAdmin;
+  document.getElementById("add-teammate-btn").onclick = addTeammate;
+  document.querySelectorAll(".admin-tab").forEach((btn) => {
+    btn.onclick = () => switchAdminTab(btn.dataset.tab);
+  });
+  document.getElementById("privatize-modal-close").onclick = closePrivatizeModal;
+  document.getElementById("dm-modal-close").onclick = closeDMs;
+  document.getElementById("reply-modal-close").onclick = closeReplyModal;
+}
+wireStaticUI();
 init();

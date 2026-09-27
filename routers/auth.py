@@ -217,7 +217,7 @@ def _user_from_pre_auth_token(token: str, db: Session) -> models.User:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session expired, please log in again")
     if payload.get("type") != "mfa_pending":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-    user = db.query(models.User).filter(models.User.id == payload.get("sub")).first()
+    user = db.query(models.User).filter(models.User.id == int(payload.get("sub"))).first()
     if not user or not user.is_active:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
     return user

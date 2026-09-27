@@ -23,7 +23,7 @@ def get_current_user(
             # Rejects an mfa_pending pre-auth token (or anything else) from
             # ever being used to reach an authenticated endpoint.
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-        user_id = payload.get("sub")
+        user_id = int(payload.get("sub"))
     except JWTError:
         # Covers both a malformed/invalid signature AND an expired token
         # (jose raises ExpiredSignatureError, a JWTError subclass, for the

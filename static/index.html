@@ -13,7 +13,7 @@
   <!-- Profile Modal -->
   <div id="profile-modal" class="modal-overlay hidden">
     <div class="modal-box">
-      <button class="modal-close" onclick="closeProfile()">
+      <button class="modal-close" id="profile-modal-close">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
       <div class="modal-body">
@@ -23,7 +23,7 @@
           <div class="profile-handle" id="profile-handle"></div>
           <div class="profile-dept" id="profile-dept"></div>
         </div>
-        <input type="file" id="profile-upload" accept="image/*" onchange="uploadProfileImage()" style="font-size:.75rem;color:var(--muted);width:100%;">
+        <input type="file" id="profile-upload" accept="image/*" style="font-size:.75rem;color:var(--muted);width:100%;">
       </div>
     </div>
   </div>
@@ -31,15 +31,15 @@
   <!-- Admin Modal -->
   <div id="admin-modal" class="modal-overlay hidden">
     <div class="modal-box" style="max-width:640px;">
-      <button class="modal-close" onclick="closeAdmin()">
+      <button class="modal-close" id="admin-modal-close">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
       <div class="modal-body">
         <h2>Admin panel</h2>
         <div class="admin-tabs">
-          <button class="admin-tab active" data-tab="add" onclick="switchAdminTab('add')">Add member</button>
-          <button class="admin-tab" data-tab="manage" onclick="switchAdminTab('manage')">Manage members</button>
-          <button class="admin-tab" data-tab="logs" onclick="switchAdminTab('logs')">Access log</button>
+          <button class="admin-tab active" data-tab="add">Add member</button>
+          <button class="admin-tab" data-tab="manage">Manage members</button>
+          <button class="admin-tab" data-tab="logs">Access log</button>
         </div>
 
         <div id="tab-add" class="admin-tab-panel">
@@ -55,7 +55,7 @@
             <option value="Marketing">Marketing</option>
             <option value="Technical Team">Technical Team</option>
           </select>
-          <button class="btn-primary" onclick="addTeammate()">Add teammate</button>
+          <button class="btn-primary" id="add-teammate-btn">Add teammate</button>
         </div>
 
         <div id="tab-manage" class="admin-tab-panel hidden">
@@ -72,7 +72,7 @@
   <!-- Mention privatize choice (shown when posting a message that @mentions exactly one teammate) -->
   <div id="privatize-modal" class="modal-overlay hidden">
     <div class="modal-box" style="max-width:420px;">
-      <button class="modal-close" onclick="closePrivatizeModal()">
+      <button class="modal-close" id="privatize-modal-close">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
       <div class="modal-body">
@@ -89,7 +89,7 @@
   <!-- Direct Messages -->
   <div id="dm-modal" class="modal-overlay hidden">
     <div class="modal-box dm-box">
-      <button class="modal-close" onclick="closeDMs()">
+      <button class="modal-close" id="dm-modal-close">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
       <div class="modal-body">
@@ -120,7 +120,7 @@
   <!-- Reply Modal -->
   <div id="reply-modal" class="modal-overlay hidden">
     <div class="modal-box reply-box">
-      <button class="modal-close" onclick="closeReplyModal()">
+      <button class="modal-close" id="reply-modal-close">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
       <div class="modal-body">
