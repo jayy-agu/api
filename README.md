@@ -1,6 +1,27 @@
+
 # Jerry Agu's Dashboard
 
 An internal communication board for small teams: department feeds, direct messages, @mentions and an admin panel. The backend is **FastAPI** and the frontend is plain **JavaScript** with no framework and no build step.
+
+# Copy this file to .env and fill in the values. Never commit the real .env.
+
+# REQUIRED. The app will not start without these two.
+# Generate with:  python -c "import secrets; print(secrets.token_hex(32))"
+SECRET_KEY=
+# Generate with:  python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+MFA_ENCRYPTION_KEY=
+
+# Production only. Leave unset locally to use a SQLite file.
+# Use the Supabase "Transaction pooler" string (port 6543) and URL-encode special characters in the password.
+# DATABASE_URL=postgresql://postgres.<project-ref>:<password>@<pooler-host>:6543/postgres
+
+# Optional (defaults shown)
+ACCESS_TOKEN_EXPIRE_MINUTES=120
+PRE_AUTH_TOKEN_EXPIRE_MINUTES=5
+MAX_FAILED_LOGIN_ATTEMPTS=3
+LOCKOUT_MINUTES=30
+MFA_MANDATORY=true
+
 
 I started it as a simple message board and then spent a good part of the project on security: mandatory MFA, server-side session revocation, rate limiting, security headers and new-device alerts. There's a longer write-up of the design decisions and the weak spots in the section [Security notes](#security-notes) below.
 
